@@ -1,6 +1,7 @@
 // Searches for seeds with Observatory in ante 2 and Perkeo in ante 1 or 2
-#include "lib/immolate.cl"
-long filter(instance* inst) {
+#include "immolate.h"
+
+llong filter(instance* inst) {
     init_locks(inst, 1, false, false);
     if (next_voucher(inst, 1) == Telescope) {
         activate_voucher(inst, Telescope);

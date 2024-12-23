@@ -1,22 +1,6 @@
-// Pseudohash
-typedef struct Text {
-    char str[256];
-    int len;
-} text;
-
-inline text init_text(__constant char* str, int len) {
-    text t;
-    for (int i = 0; i < len; i++){
-        t.str[i] = str[i];
-    }
-    t.len = len;
-    t.str[t.len] = '\0';
-    return t;
-}
-inline void set_text_length(text* t, int len) {
-    t->len = len;
-    t->str[t->len] = '\0';
-}
+#include "immolate.h"
+#include <stdio.h>
+#include <string.h>
 
 text text_concat(text a, text b) {
     text temp = a;
@@ -43,7 +27,7 @@ double pseudohash(text s) {
     int k = 32; //determines size of left and right shifts...
     for (int i = s.len - 1; i >= 0; i--) {
         // Floating point addition is weird, so we have to make it have more room for error
-        long int_part = (1.1239285023/num*s.str[i]*3.141592653589793116+3.141592653589793116*(i+1))*(1<<k);
+        llong int_part = (1.1239285023/num*s.str[i]*3.141592653589793116+3.141592653589793116*(i+1))*(1<<k);
         double fract_part = fract(fract((1.1239285023/num*s.str[i]*3.141592653589793116)*(1<<k))+fract((3.141592653589793116*(i+1))*(1<<k)));
         num = fract(((double)(int_part)+fract_part)/(1<<k));
         // What the original function would look like:
@@ -57,8 +41,8 @@ double pseudohash8(char8 s) {
     double num = 1;
     int k = 32;
     for (int i = 7; i >= 0; i--) {
-        long int_part = (1.1239285023/num*s[i]*3.141592653589793116+3.141592653589793116*(i+1))*(1<<k);
-        double fract_part = fract(fract((1.1239285023/num*s[i]*3.141592653589793116)*(1<<k))+fract((3.141592653589793116*(i+1))*(1<<k)));
+        llong int_part = (1.1239285023/num*s.data[i]*3.141592653589793116+3.141592653589793116*(i+1))*(1<<k);
+        double fract_part = fract(fract((1.1239285023/num*s.data[i]*3.141592653589793116)*(1<<k))+fract((3.141592653589793116*(i+1))*(1<<k)));
         num = fract(((double)(int_part)+fract_part)/(1<<k));
     }
     return num;
@@ -76,7 +60,7 @@ double roundDigits(double f, int d) {
     return round(f*power)/power;
 }
 
-double pseudohash_legacy(__constant char* s, size_t stringLen) {
+double pseudohash_legacy(const char* s, size_t stringLen) {
     //resizeString(&s, 16, ' ');
     int mask = 0;
     if (stringLen >= 16) {
@@ -100,47 +84,36 @@ double c16_pseudohash_legacy(char16 s) {
     //resizeString(&s, 16, ' ');
     int mask = 0;
     for (int i = 15; i >= 0; i--) {
-        mask = mask^(lsh32(mask,7)+rsh32(mask,3)+s[i]);
+        mask = mask^(lsh32(mask,7)+rsh32(mask,3)+s.data[i]);
     }
     return roundDigits(fract(sqrt((double)(abs(mask)))),13);
 }
 
 char16 c8_as_c16(char8 c8) {
-    char16 c16 = ' ';
+    char16 c16;
+    memset(c16.data, ' ', 16);
     for (int i = 0; i < 8; i++) {
-        c16[i] = c8[i];
+        c16.data[i] = c8.data[i];
     }
     return c16;
 }
 
-// math.random
-
-typedef union DoubleLong {
-    double d;
-    ulong ul;
-} dbllong;
-
-typedef struct LuaRandom {
-    ulong4 state;
-    dbllong out;
-} lrandom;
-
 void _randint(lrandom* lr) {
     ulong z, r = 0;
     z = lr->state[0];
-    z = (((z<<31)^z)>>45)^((z&((ulong)(long)-1<<1))<<18);
+    z = (((z<<31)^z)>>45)^((z&((ulong)(llong)-1<<1))<<18);
     r ^= z;
     lr->state[0] = z;
     z = lr->state[1];
-    z = (((z<<19)^z)>>30)^((z&((ulong)(long)-1<<6))<<28);
+    z = (((z<<19)^z)>>30)^((z&((ulong)(llong)-1<<6))<<28);
     r ^= z;
     lr->state[1] = z;
     z = lr->state[2];
-    z = (((z<<24)^z)>>48)^((z&((ulong)(long)-1<<9))<<7);
+    z = (((z<<24)^z)>>48)^((z&((ulong)(llong)-1<<9))<<7);
     r ^= z;
     lr->state[2] = z;
     z = lr->state[3];
-    z = (((z<<21)^z)>>39)^((z&((ulong)(long)-1<<17))<<8);
+    z = (((z<<21)^z)>>39)^((z&((ulong)(llong)-1<<17))<<8);
     r ^= z;
     lr->state[3] = z;
     lr->out.ul = r;
@@ -200,20 +173,3 @@ text int_to_str(int x) {
     out.len = digits;
     return out;
 }
-
-#define V_AT_LEAST(v1,v2,v3,v4) \
-        (VER1 > v1) || \
-        (VER1 == v1 && ((VER2 > v2) ||\
-        (VER2 == v2 && ((VER3 > v3) ||\
-        (VER3 == v3 && VER4 >= v4)))))
-
-#define V_AT_MOST(v1,v2,v3,v4) \
-        (VER1 < v1) || \
-        (VER1 == v1 && ((VER2 < v2) ||\
-        (VER2 == v2 && ((VER3 < v3) ||\
-        (VER3 == v3 && VER4 <= v4)))))
-
-// Define some constants for important game version splits
-#if V_AT_MOST(0,9999,9999,9999)
-    #define DEMO
-#endif

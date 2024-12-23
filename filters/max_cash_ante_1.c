@@ -1,7 +1,8 @@
 // Maximum cash out possible in Ante 1
-#include "lib/immolate.cl"
-long filter(instance* inst) {
-    long passedFilters = 0;
+#include "immolate.h"
+
+llong filter(instance* inst) {
+    llong passedFilters = 0;
     
     // The tags we need
     if (next_tag(inst, 1) != Charm_Tag) return passedFilters;

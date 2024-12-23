@@ -1,9 +1,4 @@
-typedef struct Card {
-    item base;
-    item enhancement;
-    item edition;
-    item seal;
-} card;
+#include "immolate.h"
 
 bool is_voucher_active(instance* inst, item voucher) {
     return inst->params.vouchers[voucher - (V_BEGIN + 1)];
@@ -29,7 +24,7 @@ item standard_enhancement(instance* inst, int ante) {
 }
 #else
 item standard_enhancement(instance* inst, int ante) {
-    if (random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Standard_Has_Enhancement, ante}, 2) <= 0.6) return No_Enhancement;
+    if (random(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Standard_Has_Enhancement, ante}, 2) <= 0.6) return No_Enhancement;
     return randchoice_common(inst, R_Enhancement, S_Standard, ante, ENHANCEMENTS);
 }
 #endif
@@ -46,7 +41,7 @@ item standard_edition(instance* inst, int ante) {
 }
 #else
 item standard_edition(instance* inst, int ante) {
-    double val = random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Standard_Edition, ante}, 2);
+    double val = random(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Standard_Edition, ante}, 2);
     if (val > 0.988) return Polychrome;
     if (val > 0.96) return Holographic;
     if (val > 0.92) return Foil;
@@ -64,8 +59,8 @@ item standard_seal(instance* inst, ante) {
 }
 #else
 item standard_seal(instance* inst, int ante) {
-    if (random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Standard_Has_Seal, ante}, 2) <= 0.8) return No_Seal;
-    double val = random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Standard_Seal, ante}, 2);
+    if (random(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Standard_Has_Seal, ante}, 2) <= 0.8) return No_Seal;
+    double val = random(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Standard_Seal, ante}, 2);
     if (val > 0.75) return Red_Seal;
     if (val > 0.5) return Blue_Seal;
     if (val > 0.25) return Gold_Seal;
@@ -84,23 +79,23 @@ card standard_card(instance* inst, int ante) {
 #ifdef DEMO
     #if V_AT_MOST(0,9,3,12)
     item next_pack(instance* inst, int ante) {
-        return randweightedchoice(inst, (__private ntype[]){N_Type}, (__private int[]){R_Shop_Pack}, 1, PACKS);
+        return randweightedchoice(inst, (ntype[]){N_Type}, (int[]){R_Shop_Pack}, 1, PACKS);
     }
     #else
     // Becomes ante-based in 0.9.3n
     item next_pack(instance* inst, int ante) {
-        return randweightedchoice(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Shop_Pack, ante}, 2, PACKS);
+        return randweightedchoice(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Shop_Pack, ante}, 2, PACKS);
     }
     #endif
 #else
     #if V_AT_MOST(1,0,0,2)
     // Not ante-based in first console release (1.0.0b)
     item next_pack(instance* inst, int ante) {
-        return randweightedchoice(inst, (__private ntype[]){N_Type}, (__private int[]){R_Shop_Pack}, 1, PACKS);
+        return randweightedchoice(inst, (ntype[]){N_Type}, (int[]){R_Shop_Pack}, 1, PACKS);
     }
     #elif V_AT_MOST(1,0,0,99)
     item next_pack(instance* inst, int ante) {
-        return randweightedchoice(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Shop_Pack, ante}, 2, PACKS);
+        return randweightedchoice(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Shop_Pack, ante}, 2, PACKS);
     }
     #else
     item next_pack(instance* inst, int ante) {
@@ -111,7 +106,7 @@ card standard_card(instance* inst, int ante) {
             inst->rngCache.generatedFirstPack = true;
             return Buffoon_Pack;
         }
-        return randweightedchoice(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Shop_Pack, ante}, 2, PACKS);
+        return randweightedchoice(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Shop_Pack, ante}, 2, PACKS);
     }
     #endif
 #endif
@@ -127,13 +122,13 @@ item next_spectral(instance* inst, rsrc itemSource, int ante, bool soulable) {
 }
 #elif V_AT_MOST(1,0,0,10)
 item next_tarot(instance* inst, rsrc itemSource, int ante, bool soulable) {
-    if (soulable && (inst->params.showman || !inst->locked[The_Soul]) && random(inst, (__private ntype[]){N_Type, N_Type}, (__private int[]){R_Soul, R_Tarot}, 2) > 0.997) {
+    if (soulable && (inst->params.showman || !inst->locked[The_Soul]) && random(inst, (ntype[]){N_Type, N_Type}, (int[]){R_Soul, R_Tarot}, 2) > 0.997) {
         return The_Soul;
     }
     return randchoice_common(inst, R_Tarot, itemSource, ante, TAROTS);
 }
 item next_planet(instance* inst, rsrc itemSource, int ante, bool soulable) {
-    if (soulable && (inst->params.showman || !inst->locked[Black_Hole]) && random(inst, (__private ntype[]){N_Type, N_Type}, (__private int[]){R_Soul, R_Planet}, 2) > 0.997) {
+    if (soulable && (inst->params.showman || !inst->locked[Black_Hole]) && random(inst, (ntype[]){N_Type, N_Type}, (int[]){R_Soul, R_Planet}, 2) > 0.997) {
         return Black_Hole;
     }
     return randchoice_common(inst, R_Planet, itemSource, ante, PLANETS);
@@ -141,10 +136,10 @@ item next_planet(instance* inst, rsrc itemSource, int ante, bool soulable) {
 item next_spectral(instance* inst, rsrc itemSource, int ante, bool soulable) {
     if (soulable) {
         item forcedKey = RETRY;
-        if ((inst->params.showman || !inst->locked[The_Soul]) && random(inst, (__private ntype[]){N_Type, N_Type}, (__private int[]){R_Soul, R_Spectral}, 2) > 0.997) {
+        if ((inst->params.showman || !inst->locked[The_Soul]) && random(inst, (ntype[]){N_Type, N_Type}, (int[]){R_Soul, R_Spectral}, 2) > 0.997) {
             forcedKey = The_Soul;
         }
-        if ((inst->params.showman || !inst->locked[Black_Hole]) && random(inst, (__private ntype[]){N_Type, N_Type}, (__private int[]){R_Soul, R_Spectral}, 2) > 0.997) {
+        if ((inst->params.showman || !inst->locked[Black_Hole]) && random(inst, (ntype[]){N_Type, N_Type}, (int[]){R_Soul, R_Spectral}, 2) > 0.997) {
             forcedKey = Black_Hole;
         }
         if (forcedKey != RETRY) return forcedKey;
@@ -153,13 +148,13 @@ item next_spectral(instance* inst, rsrc itemSource, int ante, bool soulable) {
 }
 #else
 item next_tarot(instance* inst, rsrc itemSource, int ante, bool soulable) {
-    if (soulable && (inst->params.showman || !inst->locked[The_Soul]) && random(inst, (__private ntype[]){N_Type, N_Type, N_Ante}, (__private int[]){R_Soul, R_Tarot, ante}, 3) > 0.997) {
+    if (soulable && (inst->params.showman || !inst->locked[The_Soul]) && random(inst, (ntype[]){N_Type, N_Type, N_Ante}, (int[]){R_Soul, R_Tarot, ante}, 3) > 0.997) {
         return The_Soul;
     }
     return randchoice_common(inst, R_Tarot, itemSource, ante, TAROTS);
 }
 item next_planet(instance* inst, rsrc itemSource, int ante, bool soulable) {
-    if (soulable && (inst->params.showman || !inst->locked[Black_Hole]) && random(inst, (__private ntype[]){N_Type, N_Type, N_Ante}, (__private int[]){R_Soul, R_Planet, ante}, 3) > 0.997) {
+    if (soulable && (inst->params.showman || !inst->locked[Black_Hole]) && random(inst, (ntype[]){N_Type, N_Type, N_Ante}, (int[]){R_Soul, R_Planet, ante}, 3) > 0.997) {
         return Black_Hole;
     }
     return randchoice_common(inst, R_Planet, itemSource, ante, PLANETS);
@@ -167,10 +162,10 @@ item next_planet(instance* inst, rsrc itemSource, int ante, bool soulable) {
 item next_spectral(instance* inst, rsrc itemSource, int ante, bool soulable) {
     if (soulable) {
         item forcedKey = RETRY;
-        if ((inst->params.showman || !inst->locked[The_Soul]) && random(inst, (__private ntype[]){N_Type, N_Type, N_Ante}, (__private int[]){R_Soul, R_Spectral, ante}, 3) > 0.997) {
+        if ((inst->params.showman || !inst->locked[The_Soul]) && random(inst, (ntype[]){N_Type, N_Type, N_Ante}, (int[]){R_Soul, R_Spectral, ante}, 3) > 0.997) {
             forcedKey = The_Soul;
         }
-        if ((inst->params.showman || !inst->locked[Black_Hole]) && random(inst, (__private ntype[]){N_Type, N_Type, N_Ante}, (__private int[]){R_Soul, R_Spectral, ante}, 3) > 0.997) {
+        if ((inst->params.showman || !inst->locked[Black_Hole]) && random(inst, (ntype[]){N_Type, N_Type, N_Ante}, (int[]){R_Soul, R_Spectral, ante}, 3) > 0.997) {
             forcedKey = Black_Hole;
         }
         if (forcedKey != RETRY) return forcedKey;
@@ -198,7 +193,7 @@ rarity next_joker_rarity(instance* inst, rsrc itemSource, int ante) {
         return Rarity_Common;
     } 
 
-    double randomNumber = random(inst, (__private ntype[]){N_Type, N_Ante, N_Source}, (__private int[]){R_Joker_Rarity, ante, itemSource}, 3);
+    double randomNumber = random(inst, (ntype[]){N_Type, N_Ante, N_Source}, (int[]){R_Joker_Rarity, ante, itemSource}, 3);
     if (randomNumber > 0.95) {
         return Rarity_Rare;
     }
@@ -209,7 +204,7 @@ rarity next_joker_rarity(instance* inst, rsrc itemSource, int ante) {
 }
 
 item next_joker_edition(instance* inst, rsrc itemSource, int ante) {
-    double poll = random(inst, (__private ntype[]){N_Type, N_Source, N_Ante}, (__private int[]){R_Joker_Edition, itemSource, ante}, 3);
+    double poll = random(inst, (ntype[]){N_Type, N_Source, N_Ante}, (int[]){R_Joker_Edition, itemSource, ante}, 3);
     if (poll > 0.997) return Negative;
     if (poll > 0.994) return Polychrome;
     if (poll > 0.98) return Holographic;
@@ -238,7 +233,7 @@ jokerdata next_joker_with_info(instance* inst, rsrc itemSource, int ante) {
     
     jokerstickers nextStickers = {false, false, false};
     if (itemSource == S_Shop || itemSource == S_Buffoon) {
-        double stickerPoll = random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){(itemSource == S_Buffoon) ? R_Eternal_Perishable_Pack : R_Eternal_Perishable, ante}, 2);
+        double stickerPoll = random(inst, (ntype[]){N_Type, N_Ante}, (int[]){(itemSource == S_Buffoon) ? R_Eternal_Perishable_Pack : R_Eternal_Perishable, ante}, 2);
         if (inst->params.stake >= Black_Stake && stickerPoll > 0.7) {
             if (nextJoker != Gros_Michel && nextJoker != Ice_Cream && nextJoker != Cavendish && nextJoker != Luchador
             && nextJoker != Turtle_Bean && nextJoker != Diet_Cola && nextJoker != Popcorn   && nextJoker != Ramen
@@ -253,7 +248,7 @@ jokerdata next_joker_with_info(instance* inst, rsrc itemSource, int ante) {
             nextStickers.perishable = true;
         }
         if (inst->params.stake >= Gold_Stake) {
-            nextStickers.rental = random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){(itemSource == S_Buffoon) ? R_Rental_Pack : R_Rental, ante}, 2) > 0.7;
+            nextStickers.rental = random(inst, (ntype[]){N_Type, N_Ante}, (int[]){(itemSource == S_Buffoon) ? R_Rental_Pack : R_Rental, ante}, 2) > 0.7;
         }
     }
 
@@ -349,7 +344,7 @@ itemtype get_item_type(shop shopInstance, double generatedValue) {
 shopitem next_shop_item(instance* inst, int ante) {
     shop shopInstance = get_shop_instance(inst);
 
-    double card_type = random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Card_Type, ante}, 2) * get_total_rate(shopInstance);
+    double card_type = random(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Card_Type, ante}, 2) * get_total_rate(shopInstance);
     itemtype type = get_item_type(shopInstance, card_type);
     item shopItem;
     jokerdata shopJoker;
@@ -374,17 +369,17 @@ shopitem next_shop_item(instance* inst, int ante) {
 //Todo: Update for vouchers, add a general one for any type of card
 // Deprecated, use next_shop_item() ^
 item shop_joker(instance* inst, int ante) {
-    double card_type = random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Card_Type, ante}, 2) * 28;
+    double card_type = random(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Card_Type, ante}, 2) * 28;
     if (card_type <= 20) return next_joker(inst, S_Shop, ante);
     return RETRY;
 }
 item shop_tarot(instance* inst, int ante) {
-    double card_type = random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Card_Type, ante}, 2) * 28;
+    double card_type = random(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Card_Type, ante}, 2) * 28;
     if (card_type > 20 && card_type <= 24) return next_tarot(inst, S_Shop, ante, false);
     return RETRY;
 }
 item shop_planet(instance* inst, int ante) {
-    double card_type = random(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Card_Type, ante}, 2) * 28;
+    double card_type = random(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Card_Type, ante}, 2) * 28;
     if (card_type > 24) return next_planet(inst, S_Shop, ante, false);
     return RETRY;
 }
@@ -466,11 +461,11 @@ void standard_pack(card out[], int size, instance* inst, int ante) {
 // More specific RNG types
 #ifdef DEMO
 int misprint(instance* inst) {
-    return (int)randint(inst, (__private ntype[]){N_Type}, (__private int[]){R_Misprint}, 1, 0, 20);
+    return (int)randint(inst, (ntype[]){N_Type}, (int[]){R_Misprint}, 1, 0, 20);
 }
 #else
 int misprint(instance* inst) {
-    return (int)randint(inst, (__private ntype[]){N_Type}, (__private int[]){R_Misprint}, 1, 0, 23);
+    return (int)randint(inst, (ntype[]){N_Type}, (int[]){R_Misprint}, 1, 0, 23);
 }
 #endif
 bool lucky_mult(instance* inst) {
@@ -525,11 +520,11 @@ bool cavendish_extinct(instance* inst) {
     return random_simple(inst, R_Cavendish) < 1.0/1000;
 }
 item next_voucher(instance* inst, int ante) {
-    item i = randchoice(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Voucher, ante}, 2, VOUCHERS);
+    item i = randchoice(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Voucher, ante}, 2, VOUCHERS);
     if (inst->locked[i]) {
         int resampleNum = 1;
         while (inst->locked[i]) {
-            i = randchoice(inst, (__private ntype[]){N_Type, N_Ante, N_Resample}, (__private int[]){R_Voucher, ante, resampleNum}, 3, VOUCHERS);
+            i = randchoice(inst, (ntype[]){N_Type, N_Ante, N_Resample}, (int[]){R_Voucher, ante, resampleNum}, 3, VOUCHERS);
             resampleNum++;
         }
     }
@@ -540,7 +535,7 @@ item next_voucher_from_tag(instance* inst, int ante) {
     if (inst->locked[i]) {
         int resampleNum = 1;
         while (inst->locked[i]) {
-            i = randchoice(inst, (__private ntype[]){N_Type, N_Resample}, (__private int[]){R_Voucher_Tag, resampleNum}, 2, VOUCHERS);
+            i = randchoice(inst, (ntype[]){N_Type, N_Resample}, (int[]){R_Voucher_Tag, resampleNum}, 2, VOUCHERS);
             resampleNum++;
         }
     }
@@ -579,18 +574,14 @@ item next_boss(instance* inst, int ante) {
         }
     }
     //has to be implemented like this because of randchoice() restrictions
-    inst->rng = randomseed(get_node_child(inst, (__private ntype[]){N_Type}, (__private int[]){R_Boss}, 1));
+    inst->rng = randomseed(get_node_child(inst, (ntype[]){N_Type}, (int[]){R_Boss}, 1));
     item chosen_boss =boss_pool[l_randint(&(inst->rng), 0, num_available_bosses-1)];
     inst->locked[chosen_boss] = true;
     return chosen_boss;
 }
 
 // Bubble sort, feel free to change it to something faster that works
-#ifdef __NV_CL_C_VERSION
-void sort_deck(__generic item array[], int arrayLength) {
-#else
 void sort_deck(item array[], int arrayLength) {
-#endif
     for (int i = 0; i < arrayLength - 1; i++) {
         for (int j = 0; j < arrayLength - i - 1; j++) {
             if (array[j] > array[j + 1]) {
@@ -609,11 +600,7 @@ void init_erratic_deck(instance* inst) {
 
     sort_deck(inst->params.deckCards, inst->params.deckSize);
 }
-#ifdef __NV_CL_C_VERSION
-void copy_cards(__generic item to[], __constant item from[]) {
-#else
-void copy_cards(item to[], __constant item from[]) {
-#endif
+void copy_cards(item to[], const item from[]) {
     for (int i = 0; i < from[0]; i++) {
         to[i] = from[i+1];
     }
@@ -662,7 +649,7 @@ void set_stake(instance* inst, item stake) {
 
 void shuffle_deck(instance* inst, item deck[], int ante) {
     init_deck(inst, deck);
-    inst->rng = randomseed(get_node_child(inst, (__private ntype[]){N_Type, N_Ante}, (__private int[]){R_Shuffle_New_Round, ante}, 2));
+    inst->rng = randomseed(get_node_child(inst, (ntype[]){N_Type, N_Ante}, (int[]){R_Shuffle_New_Round, ante}, 2));
     for (int i = inst->params.deckSize - 1; i >= 1; i--) {
         int x = l_randint(&(inst->rng), 1, i+1)-1;
         item temp = deck[i];

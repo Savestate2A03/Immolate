@@ -1,25 +1,5 @@
-// Contains settings used for different packs
-// Level means level of the voucher, level 0 -> no voucher, level 1 -> base voucher, level 2 -> upgraded voucher
-typedef struct InstanceParameters {
-    item deck;
-    item stake;
-    bool vouchers[32];
-    bool showman;
+#include "immolate.h"
 
-    item deckCards[52];
-    int deckSize;
-    int handSize;
-} instance_params;
-
-// Instance
-typedef struct GameInstance {
-    seed seed;
-    cache rngCache;
-    double hashedSeed;
-    lrandom rng;
-    bool locked[ITEMS_END];
-    instance_params params;
-} instance;
 instance i_new(seed s) {
     instance inst = {.locked = {true}};
     inst.seed = s;
@@ -79,7 +59,7 @@ double random(instance* inst, ntype nts[], int ids[], int num) {
     return l_random(&(inst->rng));
 }
 double random_simple(instance* inst, rtype rt) {
-    return random(inst, (__private ntype[]){N_Type}, (__private int[]){rt}, 1);
+    return random(inst, (ntype[]){N_Type}, (int[]){rt}, 1);
 }
 ulong randint(instance* inst, ntype nts[], int ids[], int num, ulong min, ulong max) {
     if (num > 0) {
@@ -88,7 +68,7 @@ ulong randint(instance* inst, ntype nts[], int ids[], int num, ulong min, ulong 
     return l_randint(&(inst->rng), min, max);
 }
 
-item randchoice(instance* inst, ntype nts[], int ids[], int num, __constant item items[]) {//, size_t item_size) { not needed, we'll have element 1 give us the size
+item randchoice(instance* inst, ntype nts[], int ids[], int num, const item items[]) {//, size_t item_size) { not needed, we'll have element 1 give us the size
     if (num > 0) {
         inst->rng = randomseed(get_node_child(inst, nts, ids, num));
     }
@@ -97,23 +77,23 @@ item randchoice(instance* inst, ntype nts[], int ids[], int num, __constant item
 
 // The most common form of randchoice
 // Now with rerolls!
-item randchoice_common(instance* inst, rtype rngType, rsrc src, int ante, __constant item items[]) {
-    item i = randchoice(inst, (__private ntype[]){N_Type, N_Source, N_Ante}, (__private int[]){rngType, src, ante}, 3, items);
+item randchoice_common(instance* inst, rtype rngType, rsrc src, int ante, const item items[]) {
+    item i = randchoice(inst, (ntype[]){N_Type, N_Source, N_Ante}, (int[]){rngType, src, ante}, 3, items);
     if (!inst->params.showman && inst->locked[i]) {
         int resampleNum = 1;
         while (inst->locked[i]) {
-            i = randchoice(inst, (__private ntype[]){N_Type, N_Source, N_Ante, N_Resample}, (__private int[]){rngType, src, ante, resampleNum}, 4, items);
+            i = randchoice(inst, (ntype[]){N_Type, N_Source, N_Ante, N_Resample}, (int[]){rngType, src, ante, resampleNum}, 4, items);
             resampleNum++;
         }
     }
     return i;
 }
-item randchoice_resample(instance* inst, rtype rngType, rsrc src, int ante, __constant item items[], int resampleNum) {
-    return randchoice(inst, (__private ntype[]){N_Type, N_Source, N_Ante, N_Resample}, (__private int[]){rngType, src, ante, resampleNum}, 4, items);
+item randchoice_resample(instance* inst, rtype rngType, rsrc src, int ante, const item items[], int resampleNum) {
+    return randchoice(inst, (ntype[]){N_Type, N_Source, N_Ante, N_Resample}, (int[]){rngType, src, ante, resampleNum}, 4, items);
 }
 
-item randchoice_simple(instance* inst, rtype rngType, __constant item items[]) {
-    return randchoice(inst, (__private ntype[]){N_Type}, (__private int[]){rngType}, 1, items);
+item randchoice_simple(instance* inst, rtype rngType, const item items[]) {
+    return randchoice(inst, (ntype[]){N_Type}, (int[]){rngType}, 1, items);
 }
 
 // Implementation specifically for dynamic arrays (Poker hands for Orbital Tag)
@@ -125,11 +105,11 @@ item randchoice_dynamic(instance* inst, ntype nts[], int ids[], int num, item it
 }
 
 item randchoice_simple_dynamic(instance* inst, rtype rngType, item items[]) {
-    return randchoice_dynamic(inst, (__private ntype[]){N_Type}, (__private int[]){rngType}, 1, items);
+    return randchoice_dynamic(inst, (ntype[]){N_Type}, (int[]){rngType}, 1, items);
 }
 // ==============================================================================
 
-void randlist(item out[], int size, instance* inst, rtype rngType, rsrc src, int ante, __constant item items[]) {
+void randlist(item out[], int size, instance* inst, rtype rngType, rsrc src, int ante, const item items[]) {
     for (int i = 0; i < size; i++) {
         out[i] = randchoice_common(inst, rngType, src, ante, items);
         if (!inst->params.showman) inst->locked[out[i]] = true; // temporary reroll for locked items
@@ -139,7 +119,7 @@ void randlist(item out[], int size, instance* inst, rtype rngType, rsrc src, int
     }
 }
 
-item randweightedchoice(instance* inst, ntype nts[], int ids[], int num, __constant weighteditem items[]) {
+item randweightedchoice(instance* inst, ntype nts[], int ids[], int num, const weighteditem items[]) {
     double poll = random(inst, nts, ids, num)*items[0].weight;
     int idx = 1;
     double weight = 0;

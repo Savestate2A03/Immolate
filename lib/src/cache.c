@@ -1,81 +1,4 @@
-// RNG Cache
-typedef enum RandomType {
-    R_Joker_Common,
-    R_Joker_Uncommon,
-    R_Joker_Rare,
-    R_Joker_Legendary,
-    R_Joker_Rarity,
-    R_Joker_Edition,
-    R_Misprint,
-    R_Standard_Has_Enhancement,
-    R_Enhancement,
-    R_Card,
-    R_Standard_Edition,
-    R_Standard_Has_Seal,
-    R_Standard_Seal,
-    R_Shop_Pack,
-    R_Tarot,
-    R_Spectral,
-    R_Tags,
-    R_Shuffle_New_Round,
-    R_Card_Type,
-    R_Planet,
-    R_Lucky_Mult,
-    R_Lucky_Money,
-    R_Sigil,
-    R_Ouija,
-    R_Wheel_of_Fortune,
-    R_Gros_Michel,
-    R_Cavendish,
-    R_Voucher,
-    R_Voucher_Tag,
-    R_Orbital_Tag,
-    R_Soul,
-    R_Erratic,
-    R_Eternal,
-    R_Perishable,
-    R_Eternal_Perishable,
-    R_Eternal_Perishable_Pack,
-    R_Rental,
-    R_Rental_Pack,
-    R_Boss,
-    R_END
-} rtype;
-
-typedef enum RNGSource {
-    S_Shop,
-    S_Emperor,
-    S_High_Priestess,
-    S_Judgement,
-    S_Wraith,
-    S_Arcana,
-    S_Celestial,
-    S_Spectral,
-    S_Standard,
-    S_Buffoon,
-    S_Vagabond,
-    S_Superposition,
-    S_Seance,
-    S_Sixth_Sense,
-    S_Top_Up,
-    S_Rare_Tag,
-    S_Uncommon_Tag,
-    S_Blue_Seal,
-    S_Purple_Seal,
-    S_8_Ball,
-    S_Soul,
-    S_Riff_Raff,
-    S_Cartomancer,
-    S_Null,
-    SOURCE_END
-} rsrc;
-
-typedef enum NodeType {
-    N_Type,
-    N_Source,
-    N_Ante,
-    N_Resample
-} ntype;
+#include "immolate.h"
 
 // String values for each node
 text type_str(int x) {
@@ -159,23 +82,6 @@ text resample_str(int x) {
         return text_concat(str1, str2);
     }
 }
-
-typedef struct RNGInfo {
-    ntype nodeTypes[4];
-    int nodeValues[4];
-    int depth;
-    double rngState;
-} rnginfo;
-
-typedef struct Cache {
-    #ifdef CACHE_SIZE
-    rnginfo nodes[CACHE_SIZE];
-    #else
-    rnginfo nodes[64];
-    #endif
-    bool generatedFirstPack;
-    int nextFreeNode;
-} cache;
 
 text node_str(ntype nt, int x) {
     switch (nt) {

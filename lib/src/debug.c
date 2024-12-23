@@ -1,3 +1,6 @@
+#include "immolate.h"
+#include <stdio.h>
+
 void print_item(item i) {
     switch(i) {
         case RETRY: printf("RETRY"); break;
